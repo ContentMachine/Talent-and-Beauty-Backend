@@ -3,8 +3,8 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 const createSuperAdminAccount = async () => {
-  const superAdminEmail = 'superadmin@yourdomain.com'; // Set your super admin email
-  const superAdminPassword = 'superSecurePassword123'; // Set a super strong password for the super admin
+  const superAdminEmail = 'aborisadedev@gmail.com'; // Set your super admin email
+  const superAdminPassword = '33848822Abo'; // Set a super strong password for the super admin
 
   // Check if a super admin already exists
   const existingAdmin = await User.findOne({ email: superAdminEmail });
