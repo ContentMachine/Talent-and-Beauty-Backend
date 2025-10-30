@@ -19,7 +19,7 @@ const createSuperAdminAccount = async () => {
   const superAdmin = new User({
     email: superAdminEmail,
     password: hashedPassword,
-    role: 'super_admin',  // Assign super_admin role
+    role: 'superadmin',  // Assign super_admin role
     isActive: true,
     isEmailVerified: true,
   });
