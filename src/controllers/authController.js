@@ -98,6 +98,8 @@ const login = asyncHandler(async (req, res, next) => {
     profile = await Talent.findOne({ user: user._id });
   } else if (user.role === 'client') {
     profile = await Client.findOne({ user: user._id });
+  } else if (user.role === 'superadmin') {
+    profile = await Client.findOne({ user: user._id });
   }
 
   res.status(200).json({
