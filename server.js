@@ -8,7 +8,7 @@ const hpp = require('hpp');
 const connectDB = require('./src/config/database');
 const errorHandler = require('./src/middlewares/errorHandler');
 const { sanitizeMiddleware } = require('./src/middlewares/sanitize');
-
+const createSuperAdminAccount = require('./src//utils/createSuperAdmin');
 const authRoutes = require('./src/routes/authRoutes');
 const talentRoutes = require('./src/routes/talentRoutes');
 const contactRoutes = require('./src/routes/contactRoutes');
@@ -99,6 +99,9 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
+
+// Create super admin account if it doesn't exist
+createSuperAdminAccount().catch((err) => console.error('Error creating super admin:', err));
 
 process.on('unhandledRejection', (err) => {
   console.error(`Unhandled Rejection: ${err.message}`);
