@@ -70,7 +70,7 @@ const login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !user.isActive) {
-    return next(new ErrorResponse('Invalid credentials', 401));
+    return next(new ErrorResponse('Invalid email credentials', 401));
   }
 
     // Check if email verified
@@ -85,7 +85,7 @@ const login = asyncHandler(async (req, res, next) => {
   const isMatch = await user.matchPassword(password);
 
   if (!isMatch) {
-    return next(new ErrorResponse('Invalid credentials', 401));
+    return next(new ErrorResponse('Invalid password credentials', 401));
   }
 
   user.lastLogin = Date.now();
