@@ -144,21 +144,27 @@ const updateUserStatus = asyncHandler(async (req, res, next) => {
 });
 
 const createAdminUser = asyncHandler(async (req, res, next) => {
-  const { email, password, role } = req.body;
+  const { email, password, role, firstName, lastName } = req.body;
 
+  // ✅ Only superadmins can create admin or ARCON users
   if (!['admin', 'arcon'].includes(role)) {
     return next(new ErrorResponse('Can only create admin or ARCON users', 400));
   }
 
+  // ✅ Check for existing email
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return next(new ErrorResponse('Email already registered', 400));
   }
 
+  // ✅ Create user (with name fields)
   const user = await User.create({
     email,
     password,
     role,
+    firstName,
+    lastName,
+    name: `${firstName} ${lastName || ''}`.trim(),
     isEmailVerified: true,
   });
 
@@ -169,6 +175,9 @@ const createAdminUser = asyncHandler(async (req, res, next) => {
       id: user._id,
       email: user.email,
       role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: user.name,
     },
   });
 });
