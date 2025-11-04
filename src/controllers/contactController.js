@@ -4,12 +4,12 @@ const Contact = require('../models/Contact');
 const { sendContactConfirmationEmail, sendAdminNotificationEmail, sendContactResponseEmail  } = require('../services/emailService');
 
 const submitContactForm = asyncHandler(async (req, res, next) => {
-  const { name, email, resonForContact, subject, message } = req.body;
+  const { name, email, reasonForContact, subject, message } = req.body;
 
   const contact = await Contact.create({
     name,
     email,
-    resonForContact,
+    reasonForContact,
     subject,
     message,
     status: 'new',
