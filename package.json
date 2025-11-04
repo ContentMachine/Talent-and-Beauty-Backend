@@ -26,6 +26,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.7",
+    "resend": "^6.4.0",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
