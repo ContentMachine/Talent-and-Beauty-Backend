@@ -22,9 +22,10 @@ const submitContactForm = asyncHandler(async (req, res, next) => {
     `<p>A new contact form has been submitted:</p>
      <p><strong>Name:</strong> ${name}</p>
      <p><strong>Email:</strong> ${email}</p>
+     <p><strong>Reason:</strong> ${reasonForContact}</p>
      <p><strong>Subject:</strong> ${subject}</p>
      <p><strong>Message:</strong> ${message}</p>
-     <p><a href="${process.env.FRONTEND_UR}/admin/contacts/${contact._id}">View in Dashboard</a></p>`
+     <p><a href="${process.env.FRONTEND_UR}/dashboard/superadmin/contact/${contact._id}">View in Dashboard</a></p>`
   );
 
   res.status(201).json({
