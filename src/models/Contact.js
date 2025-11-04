@@ -6,10 +6,9 @@ const contactSchema = new mongoose.Schema({
     required: [true, 'Name is required'],
     trim: true,
   },
-  resonForContact: {
+  reasonForContact: {
     type: String,
     required: [true, 'Reason is required'],
-    trim: true,
   },
   email: {
     type: String,
