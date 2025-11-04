@@ -25,7 +25,7 @@ const submitContactForm = asyncHandler(async (req, res, next) => {
      <p><strong>Reason:</strong> ${reasonForContact}</p>
      <p><strong>Subject:</strong> ${subject}</p>
      <p><strong>Message:</strong> ${message}</p>
-     <p><a href="${process.env.FRONTEND_UR}/dashboard/superadmin/contact/${contact._id}">View in Dashboard</a></p>`
+     <p><a href="${process.env.FRONTEND_URL}/dashboard/superadmin/contact/${contact._id}">View in Dashboard</a></p>`
   );
 
   res.status(201).json({
