@@ -129,7 +129,7 @@ const addInternalNote = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const sendResponse = asyncHandler(async (req, res, next) => {
+const sendResponse = asyncHandler(async (req, res, next) => {
   const { message } = req.body;
   const contact = await Contact.findById(req.params.id);
 

@@ -69,7 +69,7 @@ const sendPasswordSetEmail = async (email, token, firstName) => {
   });
 };
 
-export const sendContactResponseEmail = async (contact, message) => {
+const sendContactResponseEmail = async (contact, message) => {
   const html = `
     <!DOCTYPE html>
     <html>
