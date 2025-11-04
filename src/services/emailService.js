@@ -69,6 +69,74 @@ const sendPasswordSetEmail = async (email, token, firstName) => {
   });
 };
 
+export const sendContactResponseEmail = async (contact, message) => {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 0;
+            margin: 0;
+          }
+          .container {
+            max-width: 600px;
+            background: #fff;
+            margin: 40px auto;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+          }
+          .header {
+            border-bottom: 2px solid #007bff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+          }
+          .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+          }
+          .message-box {
+            background: #f3f4f6;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 15px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>Response to Your Inquiry</h2>
+          </div>
+          <p>Hi ${contact.name || "there"},</p>
+          <p>Thank you for reaching out. Here’s our response:</p>
+          <div class="message-box">
+            <p>${message}</p>
+          </div>
+          <p>We appreciate your patience and look forward to assisting you further.</p>
+          <div class="footer">
+            <p>Best regards,<br/>The Talent and Beauty Team</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    email: contact.email,
+    subject: "Response to Your Inquiry - Talent and Beauty",
+    html,
+  });
+};
+
 const sendPasswordResetEmail = async (email, token, name) => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
@@ -280,4 +348,5 @@ module.exports = {
   sendAdminNotificationEmail,
   sendARCONNotificationEmail,
   sendVerificationEmail,
+  sendContactResponseEmail,
 };

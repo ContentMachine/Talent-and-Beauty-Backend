@@ -1,7 +1,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
 const Contact = require('../models/Contact');
-const { sendContactConfirmationEmail, sendAdminNotificationEmail } = require('../services/emailService');
+const { sendContactConfirmationEmail, sendAdminNotificationEmail, sendContactResponseEmail  } = require('../services/emailService');
 
 const submitContactForm = asyncHandler(async (req, res, next) => {
   const { name, email, subject, message } = req.body;
@@ -128,25 +128,37 @@ const addInternalNote = asyncHandler(async (req, res, next) => {
   });
 });
 
-const sendResponse = asyncHandler(async (req, res, next) => {
+export const sendResponse = asyncHandler(async (req, res, next) => {
   const { message } = req.body;
-
   const contact = await Contact.findById(req.params.id);
 
   if (!contact) {
-    return next(new ErrorResponse('Contact not found', 404));
+    return next(new ErrorResponse("Contact not found", 404));
   }
 
+  // Save response to DB
   contact.responsesSent.push({
     message,
     sentBy: req.user._id,
+    sentAt: new Date(),
   });
-
   await contact.save();
+
+  // Send email to contact
+  try {
+    await sendContactResponseEmail(contact, message);
+  } catch (err) {
+    console.error("Email sending failed:", err);
+    return res.status(200).json({
+      success: true,
+      message: "Response saved, but failed to send email.",
+      data: contact,
+    });
+  }
 
   res.status(200).json({
     success: true,
-    message: 'Response recorded successfully',
+    message: "Response saved and email sent successfully.",
     data: contact,
   });
 });
