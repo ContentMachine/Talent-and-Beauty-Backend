@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer');
-import { Resend } from "resend"
+const { Resend } = require("resend");
+// const nodemailer = require('nodemailer');
 
 // const transporter = nodemailer.createTransport({
 //   host: process.env.EMAIL_HOST,
@@ -327,7 +327,7 @@ const sendVerificationEmail = async (email, token, name) => {
   });
 };
 
-export {
+module.exports = {
   sendEmail,
   sendPasswordSetEmail,
   sendPasswordResetEmail,
