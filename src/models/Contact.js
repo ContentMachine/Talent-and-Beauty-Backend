@@ -24,7 +24,7 @@ const contactSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'in-progress', 'resolved', 'closed'],
+    enum: ['new', 'inProgress', 'resolved', 'closed'],
     default: 'new',
   },
   assignedTo: {
