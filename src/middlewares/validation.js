@@ -40,7 +40,7 @@ const talentSubmissionValidation = [
 const contactValidation = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Please provide a valid email'),
-  body('reasonForContact').isEmail().withMessage('Reason is required'),
+  body('reasonForContact').notEmpty().withMessage('Reason is required'),
   body('subject').notEmpty().withMessage('Subject is required'),
   body('message').notEmpty().withMessage('Message is required').isLength({ max: 2000 }).withMessage('Message cannot exceed 2000 characters'),
   validate,
