@@ -5,6 +5,10 @@ const Client = require('../models/Client');
 const Ad = require('../models/Ad');
 const Payment = require('../models/Payment');
 const Contact = require('../models/Contact');
+const ErrorResponse = require('../utils/errorResponse');
+const {
+  sendAdminWelcomeEmail
+} = require('../services/emailService');
 
 const getDashboardStats = asyncHandler(async (req, res, next) => {
   const totalUsers = await User.countDocuments({ isActive: true });
@@ -123,6 +127,33 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
   });
 });
 
+const getSingleUser = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+
+  // Find user by ID
+  const user = await User.findById(userId).select('-password');
+
+  if (!user) {
+    return next(new ErrorResponse('User not found', 404));
+  }
+
+  // Optionally populate related models if needed
+  let relatedData = null;
+  if (user.role === 'talent') {
+    relatedData = await Talent.findOne({ user: user._id });
+  } else if (user.role === 'client') {
+    relatedData = await Client.findOne({ user: user._id });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      user,
+      relatedData,
+    },
+  });
+});
+
 const updateUserStatus = asyncHandler(async (req, res, next) => {
   const { userId, isActive } = req.body;
 
@@ -143,34 +174,42 @@ const updateUserStatus = asyncHandler(async (req, res, next) => {
   });
 });
 
+
 const createAdminUser = asyncHandler(async (req, res, next) => {
-  const { email, password, role, firstName, lastName } = req.body;
+  const { email, role, firstName, lastName } = req.body;
 
   // ✅ Only superadmins can create admin or ARCON users
-  if (!['admin', 'arcon'].includes(role)) {
-    return next(new ErrorResponse('Can only create admin or ARCON users', 400));
+  if (!["admin", "arcon"].includes(role)) {
+    return next(new ErrorResponse("Can only create admin or ARCON users", 400));
   }
 
-  // ✅ Check for existing email
+  // ✅ Check for existing user
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(new ErrorResponse('Email already registered', 400));
+    return next(new ErrorResponse("Email already registered", 400));
   }
 
-  // ✅ Create user (with name fields)
+  // ✅ Generate a secure random password
+  const crypto = require("crypto");
+  const tempPassword = crypto.randomBytes(8).toString("base64").slice(0, 10); // 10-char random
+
+  // ✅ Create new user
   const user = await User.create({
     email,
-    password,
+    password: tempPassword,
     role,
     firstName,
     lastName,
-    name: `${firstName} ${lastName || ''}`.trim(),
+    name: `${firstName} ${lastName || ""}`.trim(),
     isEmailVerified: true,
   });
 
+  // ✅ Send welcome email with credentials
+  await sendAdminWelcomeEmail(user.email, user.firstName, user.role, tempPassword);
+
   res.status(201).json({
     success: true,
-    message: `${role} user created successfully`,
+    message: `${role} user created successfully. A welcome email with login credentials has been sent to ${email}.`,
     data: {
       id: user._id,
       email: user.email,
@@ -227,4 +266,5 @@ module.exports = {
   updateUserStatus,
   createAdminUser,
   getSystemLogs,
+  getSingleUser, 
 };

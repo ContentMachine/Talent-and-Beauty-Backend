@@ -45,6 +45,13 @@ const contactValidation = [
   body('message').notEmpty().withMessage('Message is required').isLength({ max: 2000 }).withMessage('Message cannot exceed 2000 characters'),
   validate,
 ];
+const createAdminValidation = [
+  body('email').isEmail().withMessage('Please provide a valid email'),
+  body('role').notEmpty().withMessage('Role is required'),
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  validate,
+];
 
 const requestValidation = [
   body('talentId').notEmpty().withMessage('Talent ID is required'),
@@ -75,4 +82,5 @@ module.exports = {
   requestValidation,
   paymentInitValidation,
   adCreationValidation,
+  createAdminValidation
 };

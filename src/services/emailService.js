@@ -1,35 +1,35 @@
-const { Resend } = require("resend");
-// const nodemailer = require('nodemailer');
+// const { Resend } = require("resend");
+const nodemailer = require('nodemailer');
 
-// const transporter = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: process.env.EMAIL_PORT,
-//   secure: false,
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASSWORD,
-//   },
-// });
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Generic email sender using Resend API
  */
 const sendEmail = async (options) => {
   try {
-    const info = await resend.emails.send({
-      from: `${options.fromName || "Talent and Beauty"} <${process.env.EMAIL_FROM || "no-reply@talentandbeauty.com"}>`,
+    const info = await transporter.sendMail({
+      from: `${options.fromName || "Talent and Beauty"} <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
-      text: options.text,
+      text: options.text || "",
     });
 
-    console.log("✅ Email sent:", info.id || info);
+    console.log("✅ Email sent:", info.messageId);
     return info;
   } catch (error) {
-    console.error("❌ Email error:", error);
+    console.error("❌ Email send error:", error.message);
     throw error;
   }
 };
@@ -258,7 +258,7 @@ const sendAdminNotificationEmail = async (subject, message) => {
 };
 
 /**
- * ARCON Notification
+ * Notification
  */
 const sendARCONNotificationEmail = async (subject, message, attachments = []) => {
   const html = `
@@ -327,6 +327,45 @@ const sendVerificationEmail = async (email, token, name) => {
   });
 };
 
+const sendAdminWelcomeEmail = async (email, name, role, password) => {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Welcome to the Admin Portal!</h2>
+          <p>Hi ${name},</p>
+          <p>Your <strong>${role.toUpperCase()}</strong> account has been successfully created.</p>
+          <p>Here are your temporary login credentials:</p>
+          <ul>
+            <li><strong>Email:</strong> ${email}</li>
+            <li><strong>Temporary Password:</strong> ${password}</li>
+          </ul>
+          <p>We strongly recommend that you log in and reset your password immediately for security reasons.</p>
+          <a href="${process.env.FRONTEND_URL}/login" class="button">Login Now</a>
+          <div class="footer">
+            <p>Best regards,<br>The System Team</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    email,
+    subject: "Welcome to Admin Portal - Your Login Details",
+    html,
+  });
+};
+
 module.exports = {
   sendEmail,
   sendPasswordSetEmail,
@@ -337,4 +376,5 @@ module.exports = {
   sendARCONNotificationEmail,
   sendVerificationEmail,
   sendContactResponseEmail,
+  sendAdminWelcomeEmail,
 };
