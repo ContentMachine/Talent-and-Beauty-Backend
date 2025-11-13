@@ -91,7 +91,7 @@ const submitTalentAnonymous = async (req, res, next) => {
 };
 
 const createOrUpdateTalentProfile = asyncHandler(async (req, res, next) => {
-  const { firstName, lastName, phone, location, dateOfBirth, talentCategory, bio, experience, specialties, socialMedia } = req.body;
+  const {email, firstName, lastName, phone, location, dateOfBirth, talentCategory, bio, experience, specialties, socialMedia } = req.body;
 
   let talent = await Talent.findOne({ user: req.user._id });
 

@@ -1,7 +1,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
 const Contact = require('../models/Contact');
-const { sendContactConfirmationEmail, sendAdminNotificationEmail, sendContactResponseEmail  } = require('../services/emailService');
+const { sendContactConfirmationEmail,sendContactStatusUpdateEmail, sendAdminNotificationEmail, sendContactResponseEmail  } = require('../services/emailService');
 
 const submitContactForm = asyncHandler(async (req, res, next) => {
   const { name, email, reasonForContact, subject, message } = req.body;
@@ -90,15 +90,40 @@ const updateContactStatus = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Contact not found', 404));
   }
 
-  if (status) {
+  let updatedFields = [];
+
+  if (status && contact.status !== status) {
     contact.status = status;
+    updatedFields.push('status');
   }
 
-  if (assignedTo) {
+  if (assignedTo && contact.assignedTo?.toString() !== assignedTo) {
     contact.assignedTo = assignedTo;
+    updatedFields.push('assignedTo');
   }
 
   await contact.save();
+
+  // === SEND EMAILS ===
+  try {
+    // Notify contact if their status changed
+    if (updatedFields.includes('status')) {
+      await sendContactStatusUpdateEmail(contact.email, contact.name, contact.status);
+    }
+
+    // Notify admin about the update
+    await sendAdminNotificationEmail(
+      'Contact Updated',
+      `<p>The following contact record has been updated:</p>
+       <p><strong>Name:</strong> ${contact.name}</p>
+       <p><strong>Email:</strong> ${contact.email}</p>
+       <p><strong>Status:</strong> ${contact.status}</p>
+       ${assignedTo ? `<p><strong>Assigned To:</strong> ${assignedTo}</p>` : ''}
+       <p><a href="${process.env.FRONTEND_URL}/dashboard/superadmin/contact/${contact._id}">View in Dashboard</a></p>`
+    );
+  } catch (error) {
+    console.error('Email sending failed:', error);
+  }
 
   res.status(200).json({
     success: true,
@@ -106,6 +131,7 @@ const updateContactStatus = asyncHandler(async (req, res, next) => {
     data: contact,
   });
 });
+
 
 const addInternalNote = asyncHandler(async (req, res, next) => {
   const { note } = req.body;

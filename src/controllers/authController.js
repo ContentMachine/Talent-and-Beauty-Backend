@@ -15,26 +15,25 @@ const {
 const signup = asyncHandler(async (req, res, next) => {
   const { email, password, role, ...profileData } = req.body;
 
-  // Validate role
   if (!['client', 'talent'].includes(role)) {
     return next(new ErrorResponse('Invalid role for signup', 400));
   }
 
-  // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return next(new ErrorResponse('Email already registered', 400));
   }
 
-  // Create user with email unverified
+  // Create new user (unverified)
   const user = await User.create({
     email,
     password,
     role,
-    isEmailVerified: false, // ⛔ initially unverified
+    isEmailVerified: false,
+    firstName: profileData.firstName,
+    lastName: profileData.lastName,
   });
 
-  // Create client profile if applicable
   if (role === 'client') {
     await Client.create({
       user: user._id,
@@ -44,14 +43,15 @@ const signup = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // Generate verification token (24-hour expiry)
+  // Generate verification token
   const verificationToken = crypto.randomBytes(32).toString('hex');
-  user.emailVerificationToken = verificationToken;
-  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-  await user.save();
-  
+  const hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
 
-  // Send verification email
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  await user.save();
+
+  // Send the email with the *plain* token
   await sendVerificationEmail(email, verificationToken, profileData.companyName || email);
 
   res.status(201).json({
@@ -116,32 +116,29 @@ const verifyEmail = asyncHandler(async (req, res, next) => {
   const { token } = req.query;
   console.log("🔹 Received token:", token);
 
+  // Hash token before lookup
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  console.log("🔹 Hashed token:", hashedToken);
+
   const user = await User.findOne({
-    emailVerificationToken: token,
+    emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() },
   });
 
-  console.log("User found:", user);
-
-
-const users = await User.find({}, { emailVerificationToken: 1 }).limit(3);
-console.log("Sample tokens in DB:", users.map(u => u.emailVerificationToken));
-
-console.log("Sample tokens",users.emailVerificationExpires, Date.now());
+  console.log("User found:", user ? user.email : null);
 
   if (!user) {
-    return next(new ErrorResponse('Invalid or expired verification link', 400));
+    return next(new ErrorResponse("Invalid or expired verification link", 400));
   }
 
   user.isEmailVerified = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationExpires = undefined;
   await user.save();
-  
 
   res.status(200).json({
     success: true,
-    message: 'Email verified successfully. You can now log in.',
+    message: "Email verified successfully. You can now log in.",
   });
 });
 

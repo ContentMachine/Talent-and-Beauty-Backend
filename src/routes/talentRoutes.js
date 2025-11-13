@@ -48,7 +48,8 @@ router.post(
     { name: 'nin', maxCount: 1 },
     { name: 'photos', maxCount: 5 },
   ]),
-  createOrUpdateTalentProfile
+  normalizeSocialMedia,
+  asyncHandler(createOrUpdateTalentProfile)
 );
 
 router.get('/profile', protect, authorize('talent'), getTalentProfile);

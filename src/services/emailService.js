@@ -1,5 +1,6 @@
 // const { Resend } = require("resend");
 const nodemailer = require('nodemailer');
+require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -227,6 +228,43 @@ const sendContactConfirmationEmail = async (email, name) => {
   });
 };
 
+const sendContactStatusUpdateEmail = async (email, name, status) => {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .status { background-color: #f4f4f4; padding: 10px 15px; border-left: 4px solid #007bff; margin: 20px 0; }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Your Contact Status Has Been Updated</h2>
+          <p>Hi ${name},</p>
+          <p>We wanted to let you know that the status of your contact request has been updated:</p>
+          <div class="status">
+            <strong>Current Status:</strong> ${status.charAt(0).toUpperCase() + status.slice(1)}
+          </div>
+          <p>If you have any questions or need further assistance, feel free to reply to this email.</p>
+          <div class="footer">
+            <p>Best regards,<br>The Talent and Beauty Team</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    email,
+    subject: "Update on Your Contact Request - Talent and Beauty",
+    html,
+  });
+};
+
+
 /**
  * Admin Notification
  */
@@ -377,4 +415,5 @@ module.exports = {
   sendVerificationEmail,
   sendContactResponseEmail,
   sendAdminWelcomeEmail,
+  sendContactStatusUpdateEmail,
 };
