@@ -62,9 +62,10 @@ const submitTalentAnonymous = async (req, res, next) => {
         }
       : undefined,
     photos,
+    isPubliclyVisible: true,
     portfolio,
     socialMedia,
-    arconApprovalStatus: "pending",
+    arconApprovalStatus: "approved",
   });
 
   const passwordSetToken = user.generatePasswordSetToken();
